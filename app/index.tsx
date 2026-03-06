@@ -6,6 +6,7 @@ import {
   Pressable,
   Modal,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import Animated, {
   FadeIn,
@@ -57,7 +58,7 @@ export default function HomeScreen() {
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const isXUser = authMethod === "twitter";
-  const showSignModal = isXUser && authenticated && !signature && !!address;
+  const showSignModal = isXUser && authenticated && !signature && !!address && !!signError;
 
   const numAmount = parseFloat(amount) || 0;
   const hasValidAmount = numAmount > 0;
@@ -136,7 +137,7 @@ export default function HomeScreen() {
         </ScrollView>
 
         {/* Balance / Connect */}
-        <View className="relative mt-2" style={{ zIndex: 1 }}>
+        <View className="relative mt-2" style={{ zIndex: 10 }}>
           <Pressable
             onPress={handleBalancePress}
             className="flex-row items-center gap-1.5"
@@ -161,79 +162,88 @@ export default function HomeScreen() {
               />
             )}
           </Pressable>
-        </View>
-      </View>
 
-      {/* Dropdown */}
-      {showDropdown && authenticated && (
-        <View
-          className="absolute top-28 z-50 w-64 bg-light rounded-2xl overflow-hidden"
-          style={{
-            borderWidth: 1,
-            borderColor: "rgba(18, 18, 18, 0.1)",
-            shadowColor: "#121212",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 12,
-            elevation: 8,
-          }}
-        >
-          {/* Wallet Address */}
-          <Pressable
-            onPress={copied ? undefined : handleCopyAddress}
-            className="flex-row items-center gap-2.5 px-4 py-3"
-          >
-            <SolIcon width={16} height={16} />
-            <Text
-              className="text-dark text-sm flex-1"
-              style={{ fontFamily: "Jost_400Regular" }}
+          {/* Dropdown — positioned below the balance text */}
+          {showDropdown && authenticated && (
+            <View
+              className="absolute z-50 w-64 bg-light rounded-2xl overflow-hidden"
+              style={{
+                top: 36,
+                alignSelf: "center",
+                borderWidth: 1,
+                borderColor: "rgba(18, 18, 18, 0.1)",
+                shadowColor: "#121212",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 12,
+                elevation: 8,
+              }}
             >
-              {address ? formatAddr(address) : ""}
-            </Text>
-            {copied ? (
-              <SuccessAltIcon width={16} height={8} />
-            ) : (
-              <CopyIcon width={14} height={14} />
-            )}
-          </Pressable>
-
-          {/* X Handle */}
-          {isXUser && twitterHandle && (
-            <View className="flex-row items-center gap-2.5 px-4 py-3">
-              <XIcon width={16} height={16} fill="#121212" />
-              <Text
-                className="text-dark/60 text-sm"
-                style={{ fontFamily: "Jost_400Regular" }}
+              {/* Wallet Address */}
+              <Pressable
+                onPress={copied ? undefined : handleCopyAddress}
+                className="flex-row items-center gap-2.5 px-4 py-3"
               >
-                @{twitterHandle}
-              </Text>
+                <SolIcon width={16} height={16} />
+                <Text
+                  className="text-dark text-sm flex-1"
+                  style={{ fontFamily: "Jost_400Regular" }}
+                >
+                  {address ? formatAddr(address) : ""}
+                </Text>
+                {copied ? (
+                  <SuccessAltIcon width={16} height={8} />
+                ) : (
+                  <CopyIcon width={14} height={14} />
+                )}
+              </Pressable>
+
+              {/* X Handle */}
+              {isXUser && twitterHandle && (
+                <Pressable
+                  onPress={() => {
+                    setShowDropdown(false);
+                    Linking.openURL(`https://x.com/${twitterHandle}`);
+                  }}
+                  className="flex-row items-center gap-2.5 px-4 py-3"
+                >
+                  <XIcon width={16} height={16} fill="#121212" />
+                  <Text
+                    className="text-dark/60 text-sm"
+                    style={{ fontFamily: "Jost_400Regular" }}
+                  >
+                    @{twitterHandle}
+                  </Text>
+                </Pressable>
+              )}
+
+              {/* Logout */}
+              <Pressable
+                onPress={() => {
+                  setShowDropdown(false);
+                  logout();
+                }}
+                className="flex-row items-center gap-2.5 px-4 py-3"
+              >
+                <LogoutIcon width={16} height={16} />
+                <Text
+                  className="text-dark text-sm"
+                  style={{ fontFamily: "Jost_400Regular" }}
+                >
+                  Logout
+                </Text>
+              </Pressable>
             </View>
           )}
-
-          {/* Logout */}
-          <Pressable
-            onPress={() => {
-              setShowDropdown(false);
-              logout();
-            }}
-            className="flex-row items-center gap-2.5 px-4 py-3"
-          >
-            <LogoutIcon width={16} height={16} />
-            <Text
-              className="text-dark text-sm"
-              style={{ fontFamily: "Jost_400Regular" }}
-            >
-              Logout
-            </Text>
-          </Pressable>
         </View>
-      )}
+      </View>
 
       {/* Close dropdown on tap outside */}
       {showDropdown && (
         <Pressable
           onPress={() => setShowDropdown(false)}
-          className="absolute inset-0 z-40"
+          className="absolute inset-0"
+          style={{ zIndex: 5 }}
         />
       )}
 

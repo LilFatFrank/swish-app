@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Modal } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Spinner } from "@/components";
 import { useAuth } from "@/providers/AuthProvider";
@@ -64,6 +64,7 @@ export default function ProfileScreen() {
 
   const [activeTab, setActiveTab] = useState<TabType>("wallet");
   const [copied, setCopied] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -153,7 +154,7 @@ export default function ProfileScreen() {
     return (
       <View className="flex-1 items-center justify-center px-4">
         <Pressable
-          onPress={loginWithTwitter}
+          onPress={() => setShowLoginModal(true)}
           className="px-8 h-10 bg-dark rounded-full items-center justify-center"
           style={{
             shadowColor: "#121212",
@@ -170,6 +171,84 @@ export default function ProfileScreen() {
             Connect Wallet
           </Text>
         </Pressable>
+
+        {/* Login Method Selection Modal */}
+        <Modal
+          visible={showLoginModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowLoginModal(false)}
+        >
+          <Pressable
+            onPress={() => setShowLoginModal(false)}
+            className="flex-1 bg-black/40 justify-end"
+          >
+            <Pressable
+              onPress={() => {}}
+              className="bg-light rounded-t-3xl px-6 pb-10 pt-6"
+            >
+              <View className="items-center mb-2">
+                <View className="w-10 h-1 bg-dark/20 rounded-full mb-6" />
+              </View>
+              <Text
+                className="text-lg text-dark text-center mb-6"
+                style={{ fontFamily: "Jost_600SemiBold" }}
+              >
+                Connect
+              </Text>
+
+              {/* Twitter Login */}
+              <Pressable
+                onPress={() => {
+                  setShowLoginModal(false);
+                  loginWithTwitter();
+                }}
+                className="w-full h-12 bg-dark rounded-full flex-row items-center justify-center gap-2 mb-3"
+                style={{
+                  shadowColor: "#121212",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 12,
+                  elevation: 4,
+                }}
+              >
+                <XIcon width={16} height={16} fill="#fafafa" />
+                <Text
+                  className="text-light text-sm"
+                  style={{ fontFamily: "Jost_600SemiBold" }}
+                >
+                  Continue with X
+                </Text>
+              </Pressable>
+
+              {/* Wallet Connect via MWA */}
+              <Pressable
+                onPress={() => {
+                  setShowLoginModal(false);
+                  connectWallet();
+                }}
+                className="w-full h-12 bg-light rounded-full flex-row items-center justify-center gap-2"
+                style={{
+                  borderWidth: 1,
+                  borderColor: "rgba(18, 18, 18, 0.2)",
+                  shadowColor: "#121212",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 12,
+                  elevation: 4,
+                }}
+              >
+                <SolIcon width={16} height={16} />
+                <Text
+                  className="text-dark text-sm"
+                  style={{ fontFamily: "Jost_600SemiBold" }}
+                >
+                  Connect Wallet
+                </Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
       </View>
     );
   }
@@ -511,7 +590,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       ) : (
-        <ScrollView className="w-full max-w-[320px]" style={{ maxHeight: 400 }}>
+        <ScrollView className="w-full max-w-[320px]" style={{ maxHeight: 390 }}>
           {activities.length === 0 ? (
             <Text
               className="text-dark/50 text-sm text-center py-8"
