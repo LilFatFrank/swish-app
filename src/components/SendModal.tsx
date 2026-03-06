@@ -1,11 +1,12 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   Pressable,
   Modal,
-  KeyboardAvoidingView,
+  ScrollView,
+  Keyboard,
   Platform,
 } from "react-native";
 import { QRScanner } from "./QRScanner";
@@ -16,7 +17,7 @@ import { useFee } from "@/hooks/useFee";
 import { formatNumber } from "@/utils";
 import { API_BASE_URL } from "@/constants/api";
 
-import SendIcon from "@/assets/send.svg";
+import SendIcon from "@/assets/send-alt.svg";
 import SolIcon from "@/assets/sol-icon.svg";
 import XIcon from "@/assets/x-icon.svg";
 import ScanIcon from "@/assets/scan-icon.svg";
@@ -49,8 +50,26 @@ export function SendModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isResolvingX, setIsResolvingX] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const { send } = useSendTransaction();
   const { baseFee, feePercent } = useFee();
+
+  useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const numAmount = parseFloat(amount) || 0;
   const partnerFee = baseFee + numAmount * feePercent;
@@ -166,17 +185,23 @@ export function SendModal({
       visible={visible}
       transparent
       animationType="slide"
+      statusBarTranslucent
       onRequestClose={handleClose}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
         <Pressable
           onPress={handleClose}
           className="flex-1 bg-black/40 justify-end"
         >
-          <Pressable onPress={() => {}} className="bg-light rounded-t-3xl px-6 pb-10 pt-6">
+          <Pressable onPress={() => {}} className="bg-light rounded-t-3xl">
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              bounces={false}
+              contentContainerStyle={{
+                paddingHorizontal: 24,
+                paddingBottom: keyboardHeight > 0 ? keyboardHeight + 60 : 40,
+                paddingTop: 24,
+              }}
+            >
             {/* Handle bar */}
             <View className="items-center mb-2">
               <View className="w-10 h-1 bg-dark/20 rounded-full mb-4" />
@@ -524,16 +549,16 @@ export function SendModal({
                 </Pressable>
               </View>
             )}
+            </ScrollView>
           </Pressable>
         </Pressable>
 
-        {/* QR Scanner Overlay */}
-        <QRScanner
-          visible={showScanner}
-          onScan={handleQRScan}
-          onClose={() => setShowScanner(false)}
-        />
-      </KeyboardAvoidingView>
+      {/* QR Scanner Overlay */}
+      <QRScanner
+        visible={showScanner}
+        onScan={handleQRScan}
+        onClose={() => setShowScanner(false)}
+      />
     </Modal>
   );
 }
