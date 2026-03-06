@@ -127,7 +127,6 @@ export function WithdrawModal({
   };
 
   return (
-    <>
       <Modal
         visible={visible}
         transparent
@@ -424,15 +423,12 @@ export function WithdrawModal({
             </ScrollView>
           </Pressable>
         </Pressable>
+      {/* QR Scanner Overlay */}
+      <QRScanner
+        visible={showQRScanner}
+        onScan={handleQRScan}
+        onClose={() => setShowQRScanner(false)}
+      />
       </Modal>
-
-      {showQRScanner && (
-        <QRScanner
-          visible={showQRScanner}
-          onClose={() => setShowQRScanner(false)}
-          onScan={handleQRScan}
-        />
-      )}
-    </>
   );
 }
