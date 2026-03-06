@@ -119,7 +119,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 items-center px-4">
+    <View className="flex-1 items-center justify-center px-4">
       {/* Amount Display */}
       <View className="items-center mb-8 w-full">
         <ScrollView
@@ -136,10 +136,11 @@ export default function HomeScreen() {
         </ScrollView>
 
         {/* Balance / Connect */}
-        <View className="relative mt-2">
+        <View className="relative mt-2" style={{ zIndex: 1 }}>
           <Pressable
             onPress={handleBalancePress}
             className="flex-row items-center gap-1.5"
+            style={{ minHeight: 32, justifyContent: "center" }}
           >
             <Text
               className={`text-sm text-dark/50 ${!authenticated ? "underline" : ""}`}
@@ -199,7 +200,7 @@ export default function HomeScreen() {
           {/* X Handle */}
           {isXUser && twitterHandle && (
             <View className="flex-row items-center gap-2.5 px-4 py-3">
-              <XIcon width={16} height={16} />
+              <XIcon width={16} height={16} fill="#121212" />
               <Text
                 className="text-dark/60 text-sm"
                 style={{ fontFamily: "Jost_400Regular" }}
@@ -302,7 +303,7 @@ export default function HomeScreen() {
                 elevation: 4,
               }}
             >
-              <XIcon width={16} height={16} color="#fafafa" />
+              <XIcon width={16} height={16} fill="#fafafa" />
               <Text
                 className="text-light text-sm"
                 style={{ fontFamily: "Jost_600SemiBold" }}
@@ -317,7 +318,7 @@ export default function HomeScreen() {
                 setShowLoginModal(false);
                 connectWallet();
               }}
-              className="w-full h-12 rounded-full flex-row items-center justify-center gap-2"
+              className="w-full h-12 bg-light rounded-full flex-row items-center justify-center gap-2"
               style={{
                 borderWidth: 1,
                 borderColor: "rgba(18, 18, 18, 0.2)",

@@ -192,7 +192,7 @@ export default function ProfileScreen() {
   const totalUSD = (usdcBalance || 0) + (solBalanceUSD || 0);
 
   return (
-    <View className="flex-1 items-center px-4">
+    <View className="flex-1 items-center justify-center px-4">
       {/* Header: Address + X handle */}
       <View className="w-full max-w-[320px] mb-6">
         <View className="flex-row items-center justify-between gap-2 w-full">
@@ -223,7 +223,7 @@ export default function ProfileScreen() {
         </View>
         {isXUser && twitterHandle && (
           <View className="flex-row items-center gap-1.5 mt-1">
-            <XIcon width={14} height={14} />
+            <XIcon width={14} height={14} fill="#121212" />
             <Text
               className="text-dark/60 text-sm underline"
               style={{
@@ -489,7 +489,7 @@ export default function ProfileScreen() {
                 onPress={() => {
                   // TODO: Export wallet (feat/profile full)
                 }}
-                className="flex-1 h-10 rounded-full items-center justify-center"
+                className="flex-1 h-10 bg-light rounded-full items-center justify-center"
                 style={{
                   borderWidth: 1,
                   borderColor: "rgba(18, 18, 18, 0.2)",

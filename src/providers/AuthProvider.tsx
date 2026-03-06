@@ -26,7 +26,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, isReady, logout: privyLogout } = usePrivy();
-  const { login: oauthLogin } = useLoginWithOAuth();
+  const { login: oauthLogin, state: oauthState } = useLoginWithOAuth();
   const embeddedWallet = useEmbeddedSolanaWallet();
   const mwa = useMWA();
 
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isConnected(embeddedWallet)) {
         // Get address from linked Solana embedded wallet account
         const solanaEmbedded = user?.linked_accounts?.find(
-          (a: any) => a.type === "solana" && a.wallet_client_type === "privy"
+          (a: any) => a.type === "wallet" && a.wallet_client_type === "privy"
         ) as any;
         return solanaEmbedded?.address || null;
       }
@@ -62,9 +62,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const authenticated = !!authMethod && !!address;
 
-  const loginWithTwitter = useCallback(() => {
-    oauthLogin({ provider: "twitter" });
-  }, [oauthLogin]);
+  // Debug: log auth state changes
+  console.log("[Auth]", {
+    isReady,
+    hasUser: !!user,
+    isTwitterUser,
+    authMethod,
+    embeddedWalletStatus: embeddedWallet?.status,
+    address,
+    authenticated,
+    linkedAccounts: user?.linked_accounts?.map((a: any) => ({
+      type: a.type,
+      wallet_client_type: a.wallet_client_type,
+      address: a.address,
+    })),
+  });
+
+  const loginWithTwitter = useCallback(async () => {
+    if (oauthState.status === "loading") return;
+    try {
+      await oauthLogin({ provider: "twitter" });
+    } catch (err: any) {
+      console.warn("[Auth] Twitter login failed:", err?.message || err);
+    }
+  }, [oauthLogin, oauthState.status]);
 
   const connectWallet = useCallback(async () => {
     await mwa.connect();
@@ -91,9 +112,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           method: "signMessage",
           params: { message: messageStr },
         });
-        // Result signature is base58 string, convert to bytes
-        const bs58 = (await import("bs58")).default;
-        return bs58.decode(result.signature);
+        // Privy Expo SDK returns base64-encoded signature
+        const binaryStr = atob(result.signature);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+          bytes[i] = binaryStr.charCodeAt(i);
+        }
+        return bytes;
       }
       if (authMethod === "wallet") {
         return mwa.signMessage(message);

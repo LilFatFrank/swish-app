@@ -9,6 +9,11 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ExpoPrivyProvider appId={PRIVY_APP_ID}>{children}</ExpoPrivyProvider>
+    <ExpoPrivyProvider
+      appId={PRIVY_APP_ID}
+      clientId="client-WY6Vppp6qLxRM6k6TMWi3Zcj5RMJa16PDGUJ4SCmPCKTb"
+    >
+      {children}
+    </ExpoPrivyProvider>
   );
 }

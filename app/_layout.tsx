@@ -1,3 +1,6 @@
+import "react-native-get-random-values";
+import { Buffer } from "buffer";
+globalThis.Buffer = Buffer;
 import { useEffect } from "react";
 import { View } from "react-native";
 import { Slot } from "expo-router";
