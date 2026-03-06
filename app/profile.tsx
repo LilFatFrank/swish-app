@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Modal } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { Spinner, WithdrawModal, DepositModal } from "@/components";
+import { Spinner, WithdrawModal, DepositModal, ExportModal } from "@/components";
 import { useAuth } from "@/providers/AuthProvider";
 import { useSessionSignature } from "@/hooks/useSessionSignature";
 import { useUSDCBalance } from "@/hooks/useUSDCBalance";
@@ -70,6 +70,7 @@ export default function ProfileScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const isXUser = authMethod === "twitter";
 
@@ -569,7 +570,7 @@ export default function ProfileScreen() {
             {isXUser && (
               <Pressable
                 onPress={() => {
-                  // TODO: Export wallet (feat/profile full)
+                  setShowExportModal(true);
                 }}
                 className="flex-1 h-10 bg-light rounded-full items-center justify-center"
                 style={{
@@ -638,6 +639,11 @@ export default function ProfileScreen() {
         </ScrollView>
       )}
     </View>
+
+    <ExportModal
+      visible={showExportModal}
+      onClose={() => setShowExportModal(false)}
+    />
 
     {address && (
       <DepositModal
