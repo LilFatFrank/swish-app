@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Modal } from "react-native";
 import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
 import { Spinner, WithdrawModal, DepositModal, ExportModal } from "@/components";
 import { useAuth } from "@/providers/AuthProvider";
 import { useSessionSignature } from "@/hooks/useSessionSignature";
@@ -9,12 +10,15 @@ import { useSOLBalance } from "@/hooks/useSOLBalance";
 import { formatNumber } from "@/utils";
 import { API_BASE_URL } from "@/constants/api";
 
+import { hapticLight } from "@/utils/haptics";
 import CopyIcon from "@/assets/copy-icon.svg";
 import SuccessAltIcon from "@/assets/success-alt.svg";
 import LogoutIcon from "@/assets/logout-icon.svg";
 import XIcon from "@/assets/x-icon.svg";
 import UsdcIcon from "@/assets/usdc-icon.svg";
 import SolIcon from "@/assets/sol-icon.svg";
+import SendAltIcon from "@/assets/send-alt.svg";
+import ReceiveAltIcon from "@/assets/receive-alt.svg";
 
 interface Stats {
   sent_direct: number;
@@ -103,6 +107,7 @@ export default function ProfileScreen() {
     if (!address) return;
     await Clipboard.setStringAsync(address);
     setCopied(true);
+    hapticLight();
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -128,6 +133,30 @@ export default function ProfileScreen() {
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
     return `${date.getDate()} ${months[date.getMonth()]}`;
+  };
+
+  const router = useRouter();
+
+  const getActivityIcon = (activity: Activity) => {
+    const isSender =
+      activity.sender_address?.toLowerCase() === address?.toLowerCase();
+    if (activity.type === "send" || activity.type === "send_claim") {
+      return isSender ? SendAltIcon : ReceiveAltIcon;
+    }
+    if (activity.type === "request") {
+      if (activity.receiver_address?.toLowerCase() === address?.toLowerCase()) {
+        return ReceiveAltIcon;
+      }
+      return SendAltIcon;
+    }
+    return SendAltIcon;
+  };
+
+  const getActivityLink = (activity: Activity): string | null => {
+    if (activity.status !== "open") return null;
+    if (activity.type === "request") return `/r/${activity.id}`;
+    if (activity.type === "send_claim") return `/c/${activity.id}`;
+    return null;
   };
 
   const getActivityLabel = (activity: Activity) => {
@@ -157,7 +186,7 @@ export default function ProfileScreen() {
     return (
       <View className="flex-1 items-center justify-center px-4">
         <Pressable
-          onPress={() => setShowLoginModal(true)}
+          onPress={() => { hapticLight(); setShowLoginModal(true); }}
           className="px-8 h-10 bg-dark rounded-full items-center justify-center"
           style={{
             shadowColor: "#121212",
@@ -203,6 +232,7 @@ export default function ProfileScreen() {
               {/* Twitter Login */}
               <Pressable
                 onPress={() => {
+                  hapticLight();
                   setShowLoginModal(false);
                   loginWithTwitter();
                 }}
@@ -227,6 +257,7 @@ export default function ProfileScreen() {
               {/* Wallet Connect via MWA */}
               <Pressable
                 onPress={() => {
+                  hapticLight();
                   setShowLoginModal(false);
                   connectWallet();
                 }}
@@ -297,7 +328,7 @@ export default function ProfileScreen() {
               )}
             </Pressable>
             <Pressable
-              onPress={logout}
+              onPress={() => { hapticLight(); logout(); }}
               className="p-1 rounded-full"
             >
               <LogoutIcon width={16} height={16} />
@@ -323,7 +354,7 @@ export default function ProfileScreen() {
       {/* Tab Toggle */}
       <View className="w-full max-w-[320px] flex-row mb-6 bg-dark/5 rounded-full p-1">
         <Pressable
-          onPress={() => setActiveTab("wallet")}
+          onPress={() => { hapticLight(); setActiveTab("wallet"); }}
           className={`flex-1 h-8 rounded-full items-center justify-center ${
             activeTab === "wallet" ? "bg-dark" : ""
           }`}
@@ -338,7 +369,7 @@ export default function ProfileScreen() {
           </Text>
         </Pressable>
         <Pressable
-          onPress={() => setActiveTab("activity")}
+          onPress={() => { hapticLight(); setActiveTab("activity"); }}
           className={`flex-1 h-8 rounded-full items-center justify-center ${
             activeTab === "activity" ? "bg-dark" : ""
           }`}
@@ -529,6 +560,7 @@ export default function ProfileScreen() {
           <View className="flex-row gap-3">
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowDepositModal(true);
               }}
               className="flex-1 h-10 bg-dark rounded-full items-center justify-center"
@@ -549,6 +581,7 @@ export default function ProfileScreen() {
             </Pressable>
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowWithdrawModal(true);
               }}
               className="flex-1 h-10 bg-dark rounded-full items-center justify-center"
@@ -570,6 +603,7 @@ export default function ProfileScreen() {
             {isXUser && (
               <Pressable
                 onPress={() => {
+                  hapticLight();
                   setShowExportModal(true);
                 }}
                 className="flex-1 h-10 bg-light rounded-full items-center justify-center"
@@ -604,36 +638,59 @@ export default function ProfileScreen() {
             </Text>
           ) : (
             <View className="gap-2">
-              {activities.map((activity) => (
-                <View
-                  key={activity.id}
-                  className="flex-row items-start gap-3 py-1"
-                >
-                  <View className="flex-1">
+              {activities.map((activity) => {
+                const Icon = getActivityIcon(activity);
+                const link = getActivityLink(activity);
+                const content = (
+                  <>
+                    <Icon width={20} height={20} />
+                    <View className="flex-1">
+                      <Text
+                        className="text-dark text-sm"
+                        style={{ fontFamily: "Jost_400Regular" }}
+                      >
+                        {getActivityLabel(activity)}
+                      </Text>
+                      <Text
+                        className="text-xs uppercase"
+                        style={{
+                          fontFamily: "Jost_400Regular",
+                          color: STATUS_COLORS[activity.status],
+                        }}
+                      >
+                        {activity.status}
+                      </Text>
+                    </View>
                     <Text
-                      className="text-dark text-sm"
+                      className="text-dark/50 text-xs"
                       style={{ fontFamily: "Jost_400Regular" }}
                     >
-                      {getActivityLabel(activity)}
+                      {formatTimeAgo(activity.created_at)}
                     </Text>
-                    <Text
-                      className="text-xs uppercase"
-                      style={{
-                        fontFamily: "Jost_400Regular",
-                        color: STATUS_COLORS[activity.status],
-                      }}
+                  </>
+                );
+
+                if (link) {
+                  return (
+                    <Pressable
+                      key={activity.id}
+                      onPress={() => { hapticLight(); router.push(link as any); }}
+                      className="flex-row items-start gap-3 py-1"
                     >
-                      {activity.status}
-                    </Text>
-                  </View>
-                  <Text
-                    className="text-dark/50 text-xs"
-                    style={{ fontFamily: "Jost_400Regular" }}
+                      {content}
+                    </Pressable>
+                  );
+                }
+
+                return (
+                  <View
+                    key={activity.id}
+                    className="flex-row items-start gap-3 py-1"
                   >
-                    {formatTimeAgo(activity.created_at)}
-                  </Text>
-                </View>
-              ))}
+                    {content}
+                  </View>
+                );
+              })}
             </View>
           )}
         </ScrollView>
@@ -658,7 +715,7 @@ export default function ProfileScreen() {
       onClose={() => {
         setShowWithdrawModal(false);
       }}
-      usdcBalance={usdcBalance}
+      usdcBalance={usdcBalance ?? 0}
       signature={signature}
       senderPublicKey={address}
     />

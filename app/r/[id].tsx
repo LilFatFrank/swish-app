@@ -9,6 +9,8 @@ import { Spinner } from "@/components";
 import { formatNumber } from "@/utils";
 import { API_BASE_URL } from "@/constants/api";
 
+import { hapticLight, hapticSuccess, hapticError } from "@/utils/haptics";
+import { formatError } from "@/utils/formatError";
 import SendIcon from "@/assets/send.svg";
 import SuccessAltIcon from "@/assets/success-alt.svg";
 import SolIcon from "@/assets/sol-icon.svg";
@@ -38,7 +40,7 @@ type PageState =
 export default function RequestPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { authenticated, address, loginWithTwitter, connectWallet } = useAuth();
-  const { signature } = useSessionSignature();
+  const { signature, requestSignature } = useSessionSignature();
   const { baseFee, feePercent } = useFee();
   const { fulfill } = useFulfillRequest();
   const [requestData, setRequestData] = useState<RequestData | null>(null);
@@ -91,7 +93,11 @@ export default function RequestPage() {
       return;
     }
 
-    if (!signature || !address) return;
+    if (!address) return;
+    if (!signature) {
+      await requestSignature();
+      return;
+    }
 
     setPageState("processing");
     setErrorMessage(null);
@@ -103,15 +109,21 @@ export default function RequestPage() {
         payerPublicKey: address,
       });
       setPageState("success");
+      hapticSuccess();
     } catch (error: any) {
       console.error("Pay request failed:", error);
-      setErrorMessage(error.message || "Something went wrong");
+      setErrorMessage(formatError(error));
       setPageState("error");
+      hapticError();
     }
   };
 
   const handleCancel = async () => {
-    if (!signature || !address) return;
+    if (!address) return;
+    if (!signature) {
+      await requestSignature();
+      return;
+    }
 
     setPageState("cancelling");
     setErrorMessage(null);
@@ -135,10 +147,12 @@ export default function RequestPage() {
       }
 
       setPageState("cancelled");
+      hapticSuccess();
     } catch (error: any) {
       console.error("Cancel request failed:", error);
-      setErrorMessage(error.message || "Something went wrong");
+      setErrorMessage(formatError(error));
       setPageState("error");
+      hapticError();
     }
   };
 
@@ -260,7 +274,7 @@ export default function RequestPage() {
           {errorMessage || "Please try again later."}
         </Text>
         <Pressable
-          onPress={() => setPageState("ready")}
+          onPress={() => { hapticLight(); setPageState("ready"); }}
           className="px-6 h-10 bg-dark rounded-full items-center justify-center"
           style={{
             shadowColor: "#121212",
@@ -294,7 +308,7 @@ export default function RequestPage() {
           className="text-6xl text-dark text-center"
           style={{ fontFamily: "Jost_300Light" }}
         >
-          {requestData.amount}
+          ${requestData.amount}
         </Text>
         {requestData.message && (
           <Text
@@ -347,7 +361,7 @@ export default function RequestPage() {
       {/* Pay Button (for payers) */}
       {pageState === "ready" && !isRequestor && (
         <Pressable
-          onPress={handlePay}
+          onPress={() => { hapticLight(); handlePay(); }}
           className="w-full max-w-[320px] self-center h-12 bg-dark rounded-full items-center justify-center"
           style={{
             shadowColor: "#121212",
@@ -364,7 +378,7 @@ export default function RequestPage() {
       {/* Cancel Button (for requestor) */}
       {pageState === "ready" && isRequestor && (
         <Pressable
-          onPress={handleCancel}
+          onPress={() => { hapticLight(); handleCancel(); }}
           className="w-full max-w-[320px] self-center h-12 bg-light rounded-full items-center justify-center"
           style={{
             borderWidth: 1,
@@ -430,6 +444,7 @@ export default function RequestPage() {
 
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowLoginModal(false);
                 loginWithTwitter();
               }}
@@ -453,6 +468,7 @@ export default function RequestPage() {
 
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowLoginModal(false);
                 connectWallet();
               }}

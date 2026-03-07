@@ -17,6 +17,8 @@ import { useFee } from "@/hooks/useFee";
 import { formatNumber } from "@/utils";
 import { API_BASE_URL } from "@/constants/api";
 
+import { hapticLight, hapticSuccess, hapticError } from "@/utils/haptics";
+import { formatError } from "@/utils/formatError";
 import SendIcon from "@/assets/send-alt.svg";
 import SolIcon from "@/assets/sol-icon.svg";
 import XIcon from "@/assets/x-icon.svg";
@@ -142,10 +144,12 @@ export function SendModal({
         senderPublicKey,
       });
       setState("success");
+      hapticSuccess();
     } catch (error: any) {
       console.error("Send failed:", error);
-      setErrorMessage(error.message || "Transaction failed");
+      setErrorMessage(formatError(error));
       setState("error");
+      hapticError();
     }
   };
 
@@ -223,7 +227,7 @@ export function SendModal({
                 {/* Recipient Type Toggle */}
                 <View className="flex-row mb-4 bg-dark/5 rounded-full p-1">
                   <Pressable
-                    onPress={() => setRecipientType("wallet")}
+                    onPress={() => { hapticLight(); setRecipientType("wallet"); }}
                     className={`flex-1 flex-row items-center justify-center gap-1.5 h-8 rounded-full ${
                       recipientType === "wallet" ? "bg-dark" : ""
                     }`}
@@ -241,7 +245,7 @@ export function SendModal({
                     </Text>
                   </Pressable>
                   <Pressable
-                    onPress={() => setRecipientType("x")}
+                    onPress={() => { hapticLight(); setRecipientType("x"); }}
                     className={`flex-1 flex-row items-center justify-center gap-1.5 h-8 rounded-full ${
                       recipientType === "x" ? "bg-dark" : ""
                     }`}
@@ -287,7 +291,7 @@ export function SendModal({
                           }}
                         />
                         <Pressable
-                          onPress={() => setShowScanner(true)}
+                          onPress={() => { hapticLight(); setShowScanner(true); }}
                           className="w-12 h-12 rounded-full items-center justify-center"
                           style={{
                             borderWidth: 1,
@@ -373,7 +377,7 @@ export function SendModal({
 
                 {/* Proceed Button */}
                 <Pressable
-                  onPress={handleProceed}
+                  onPress={() => { hapticLight(); handleProceed(); }}
                   disabled={!canProceed || isResolvingX}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
@@ -397,6 +401,7 @@ export function SendModal({
                 {recipientType === "wallet" && (
                   <Pressable
                     onPress={() => {
+                      hapticLight();
                       handleClose();
                       onSendViaClaim();
                     }}
@@ -492,7 +497,7 @@ export function SendModal({
 
                 {/* Success Button */}
                 <Pressable
-                  onPress={handleClose}
+                  onPress={() => { hapticLight(); handleClose(); }}
                   className="w-full h-10 bg-light rounded-full items-center justify-center"
                   style={{
                     borderWidth: 1,
@@ -530,7 +535,7 @@ export function SendModal({
                   {errorMessage || "Something went wrong"}
                 </Text>
                 <Pressable
-                  onPress={handleRetry}
+                  onPress={() => { hapticLight(); handleRetry(); }}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
                     shadowColor: "#121212",

@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import DeleteIcon from "@/assets/delete.svg";
+import { hapticLight } from "@/utils/haptics";
 
 interface NumberPadProps {
   onNumberPress: (num: string) => void;
@@ -14,7 +15,7 @@ export function NumberPad({ onNumberPress, onBackspace }: NumberPadProps) {
       {keys.map((num) => (
         <View key={num} style={{ width: "33.33%" }} className="items-center">
           <Pressable
-            onPress={() => onNumberPress(num)}
+            onPress={() => { hapticLight(); onNumberPress(num); }}
             className="h-14 w-full items-center justify-center rounded-xl active:bg-dark/10"
           >
             <Text
@@ -28,7 +29,7 @@ export function NumberPad({ onNumberPress, onBackspace }: NumberPadProps) {
       ))}
       <View style={{ width: "33.33%" }} className="items-center">
         <Pressable
-          onPress={onBackspace}
+          onPress={() => { hapticLight(); onBackspace(); }}
           className="h-14 w-full items-center justify-center rounded-xl active:bg-dark/10"
         >
           <DeleteIcon width={28} height={19} />

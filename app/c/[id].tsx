@@ -8,6 +8,8 @@ import { Spinner, ClaimPassphraseModal } from "@/components";
 import { formatNumber } from "@/utils";
 import { API_BASE_URL } from "@/constants/api";
 
+import { hapticLight, hapticSuccess, hapticError } from "@/utils/haptics";
+import { formatError } from "@/utils/formatError";
 import ReceiveIcon from "@/assets/receive.svg";
 import SuccessAltIcon from "@/assets/success-alt.svg";
 import SolIcon from "@/assets/sol-icon.svg";
@@ -36,7 +38,7 @@ type PageState =
 export default function ClaimPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { authenticated, address, loginWithTwitter, connectWallet } = useAuth();
-  const { signature } = useSessionSignature();
+  const { signature, requestSignature } = useSessionSignature();
   const { baseFee, feePercent } = useFee();
   const [claimData, setClaimData] = useState<ClaimData | null>(null);
   const [pageState, setPageState] = useState<PageState>("loading");
@@ -89,10 +91,15 @@ export default function ClaimPage() {
 
   const handleClaimSuccess = () => {
     setPageState("success");
+    hapticSuccess();
   };
 
   const handleReclaim = async () => {
-    if (!signature || !address) return;
+    if (!address) return;
+    if (!signature) {
+      await requestSignature();
+      return;
+    }
 
     setPageState("reclaiming");
     setErrorMessage(null);
@@ -116,10 +123,12 @@ export default function ClaimPage() {
       }
 
       setPageState("reclaimed");
+      hapticSuccess();
     } catch (error: any) {
       console.error("Reclaim failed:", error);
-      setErrorMessage(error.message || "Something went wrong");
+      setErrorMessage(formatError(error));
       setPageState("error");
+      hapticError();
     }
   };
 
@@ -200,7 +209,7 @@ export default function ClaimPage() {
           {errorMessage || "Please try again later."}
         </Text>
         <Pressable
-          onPress={() => setPageState("ready")}
+          onPress={() => { hapticLight(); setPageState("ready"); }}
           className="px-6 h-10 bg-dark rounded-full items-center justify-center"
           style={{
             shadowColor: "#121212",
@@ -270,7 +279,7 @@ export default function ClaimPage() {
             className="text-6xl text-dark text-center"
             style={{ fontFamily: "Jost_300Light" }}
           >
-            {claimData.amount}
+            ${claimData.amount}
           </Text>
           {claimData.message && (
             <Text
@@ -313,7 +322,7 @@ export default function ClaimPage() {
         {/* Claim Button (for receivers) */}
         {pageState === "ready" && !claimData.isSender && (
           <Pressable
-            onPress={handleClaim}
+            onPress={() => { hapticLight(); handleClaim(); }}
             className="w-full max-w-[320px] self-center h-12 bg-dark rounded-full items-center justify-center"
             style={{
               shadowColor: "#121212",
@@ -330,7 +339,7 @@ export default function ClaimPage() {
         {/* Reclaim Button (for sender) */}
         {pageState === "ready" && claimData.isSender && (
           <Pressable
-            onPress={handleReclaim}
+            onPress={() => { hapticLight(); handleReclaim(); }}
             className="w-full max-w-[320px] self-center h-12 bg-light rounded-full items-center justify-center"
             style={{
               borderWidth: 1,
@@ -408,6 +417,7 @@ export default function ClaimPage() {
 
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowLoginModal(false);
                 loginWithTwitter();
               }}
@@ -431,6 +441,7 @@ export default function ClaimPage() {
 
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowLoginModal(false);
                 connectWallet();
               }}

@@ -15,6 +15,8 @@ import { useFee } from "@/hooks/useFee";
 import { formatNumber } from "@/utils";
 import { API_BASE_URL } from "@/constants/api";
 
+import { hapticLight, hapticSuccess, hapticError } from "@/utils/haptics";
+import { formatError } from "@/utils/formatError";
 import ReceiveIcon from "@/assets/receive-alt.svg";
 import CopyIcon from "@/assets/copy-icon.svg";
 import SuccessIcon from "@/assets/success.svg";
@@ -98,25 +100,20 @@ export function ReceiveModal({
       const data = await res.json();
       setRequestLink(data.requestLink);
       setState("success");
+      hapticSuccess();
     } catch (error: any) {
       console.error("Request failed:", error);
-      setErrorMessage(error.message || "Something went wrong");
+      setErrorMessage(formatError(error));
       setState("error");
+      hapticError();
     }
   };
 
   const handleCopyLink = async () => {
     await Clipboard.setStringAsync(requestLink);
     setCopied(true);
+    hapticLight();
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleShareLink = async () => {
-    try {
-      await Share.share({
-        message: requestLink,
-      });
-    } catch {}
   };
 
   const handleClose = () => {
@@ -257,7 +254,7 @@ export function ReceiveModal({
 
                 {/* Proceed Button */}
                 <Pressable
-                  onPress={handleProceed}
+                  onPress={() => { hapticLight(); handleProceed(); }}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
                     shadowColor: "#121212",
@@ -387,7 +384,7 @@ export function ReceiveModal({
                   {errorMessage || "Something went wrong"}
                 </Text>
                 <Pressable
-                  onPress={handleRetry}
+                  onPress={() => { hapticLight(); handleRetry(); }}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
                     shadowColor: "#121212",

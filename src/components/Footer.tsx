@@ -1,5 +1,6 @@
 import { View, Pressable } from "react-native";
 import { usePathname, router } from "expo-router";
+import { hapticLight } from "@/utils/haptics";
 import HomeIcon from "@/assets/home-icon.svg";
 import ProfileIcon from "@/assets/profile-icon.svg";
 
@@ -17,7 +18,7 @@ export function Footer() {
         }}
       >
         <Pressable
-          onPress={() => router.push("/")}
+          onPress={() => { hapticLight(); router.push("/"); }}
           className="py-1 px-2 rounded-full"
         >
           <HomeIcon
@@ -27,7 +28,7 @@ export function Footer() {
           />
         </Pressable>
         <Pressable
-          onPress={() => router.push("/profile")}
+          onPress={() => { hapticLight(); router.push("/profile"); }}
           className="py-1 px-2 rounded-full"
         >
           <ProfileIcon

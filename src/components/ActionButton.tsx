@@ -1,6 +1,7 @@
 import { Pressable } from "react-native";
 import SendIcon from "@/assets/send.svg";
 import ReceiveIcon from "@/assets/receive.svg";
+import { hapticMedium } from "@/utils/haptics";
 
 interface ActionButtonProps {
   variant: "send" | "receive";
@@ -13,7 +14,7 @@ export function ActionButton({ variant, onPress, disabled }: ActionButtonProps) 
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => { hapticMedium(); onPress?.(); }}
       disabled={disabled}
       className="w-full h-10 bg-dark rounded-full items-center justify-center"
       style={[

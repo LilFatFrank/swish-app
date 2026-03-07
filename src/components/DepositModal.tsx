@@ -3,6 +3,7 @@ import { View, Text, Pressable, Modal } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import QRCodeStyled from "react-native-qrcode-styled";
 
+import { hapticLight } from "@/utils/haptics";
 import CopyIcon from "@/assets/copy-icon.svg";
 import SuccessAltIcon from "@/assets/success-alt.svg";
 
@@ -22,6 +23,7 @@ export function DepositModal({
   const handleCopy = async () => {
     await Clipboard.setStringAsync(walletAddress);
     setCopied(true);
+    hapticLight();
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -65,9 +67,7 @@ export function DepositModal({
               <QRCodeStyled
                 data={walletAddress}
                 style={{ width: 200, height: 200 }}
-                pieceSize={6}
                 color="#121212"
-                backgroundColor="#FFFFFF"
               />
             </View>
           </View>
