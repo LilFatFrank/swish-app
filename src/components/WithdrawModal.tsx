@@ -15,6 +15,8 @@ import { QRScanner } from "./QRScanner";
 import { useWithdrawTransaction } from "@/hooks/useWithdrawTransaction";
 import { formatNumber } from "@/utils";
 
+import { hapticLight, hapticSuccess, hapticError } from "@/utils/haptics";
+import { formatError } from "@/utils/formatError";
 import SendIcon from "@/assets/send-alt.svg";
 import ScanIcon from "@/assets/scan-icon.svg";
 import SuccessAltIcon from "@/assets/success-alt.svg";
@@ -92,10 +94,12 @@ export function WithdrawModal({
         senderPublicKey,
       });
       setState("success");
+      hapticSuccess();
     } catch (error: any) {
       console.error("Withdraw failed:", error);
-      setErrorMessage(error.message || "Withdraw failed");
+      setErrorMessage(formatError(error));
       setState("error");
+      hapticError();
     }
   };
 
@@ -190,7 +194,7 @@ export function WithdrawModal({
                         }}
                       />
                       <Pressable
-                        onPress={() => setShowQRScanner(true)}
+                        onPress={() => { hapticLight(); setShowQRScanner(true); }}
                         className="w-12 h-12 rounded-full items-center justify-center"
                         style={{
                           borderWidth: 1,
@@ -224,7 +228,7 @@ export function WithdrawModal({
                         }}
                       />
                       <Pressable
-                        onPress={handleMax}
+                        onPress={() => { hapticLight(); handleMax(); }}
                         className="h-12 px-4 rounded-full items-center justify-center"
                         style={{
                           borderWidth: 1,
@@ -281,7 +285,7 @@ export function WithdrawModal({
 
                   {/* Proceed Button */}
                   <Pressable
-                    onPress={handleProceed}
+                    onPress={() => { hapticLight(); handleProceed(); }}
                     disabled={!canProceed}
                     className="w-full h-10 bg-dark rounded-full items-center justify-center"
                     style={{
@@ -363,7 +367,7 @@ export function WithdrawModal({
                   </View>
 
                   <Pressable
-                    onPress={handleClose}
+                    onPress={() => { hapticLight(); handleClose(); }}
                     className="w-full h-10 bg-light rounded-full items-center justify-center"
                     style={{
                       borderWidth: 1,
@@ -401,7 +405,7 @@ export function WithdrawModal({
                     {errorMessage || "Something went wrong"}
                   </Text>
                   <Pressable
-                    onPress={handleRetry}
+                    onPress={() => { hapticLight(); handleRetry(); }}
                     className="w-full h-10 bg-dark rounded-full items-center justify-center"
                     style={{
                       shadowColor: "#121212",

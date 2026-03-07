@@ -26,6 +26,7 @@ import { useUSDCBalance } from "@/hooks/useUSDCBalance";
 import { useUserRegistration } from "@/hooks/useUserRegistration";
 import { formatNumber } from "@/utils";
 
+import { hapticLight, hapticMedium } from "@/utils/haptics";
 import ChevronDownIcon from "@/assets/chevron-down-icon.svg";
 import SolIcon from "@/assets/sol-icon.svg";
 import XIcon from "@/assets/x-icon.svg";
@@ -105,6 +106,7 @@ export default function HomeScreen() {
     if (!address) return;
     await Clipboard.setStringAsync(address);
     setCopied(true);
+    hapticLight();
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -121,6 +123,7 @@ export default function HomeScreen() {
   }, [authenticated, balanceLoading, balance, address]);
 
   const handleBalancePress = () => {
+    hapticLight();
     if (!authenticated) {
       setShowLoginModal(true);
       return;
@@ -211,6 +214,7 @@ export default function HomeScreen() {
               {isXUser && twitterHandle && (
                 <Pressable
                   onPress={() => {
+                    hapticLight();
                     setShowDropdown(false);
                     Linking.openURL(`https://x.com/${twitterHandle}`);
                   }}
@@ -229,6 +233,7 @@ export default function HomeScreen() {
               {/* Logout */}
               <Pressable
                 onPress={() => {
+                  hapticLight();
                   setShowDropdown(false);
                   logout();
                 }}
@@ -310,6 +315,7 @@ export default function HomeScreen() {
             {/* Twitter Login */}
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowLoginModal(false);
                 loginWithTwitter();
               }}
@@ -334,6 +340,7 @@ export default function HomeScreen() {
             {/* Wallet Connect via MWA */}
             <Pressable
               onPress={() => {
+                hapticLight();
                 setShowLoginModal(false);
                 connectWallet();
               }}
@@ -424,7 +431,7 @@ export default function HomeScreen() {
                 Swish.
               </Text>
               <Pressable
-                onPress={requestSignature}
+                onPress={() => { hapticLight(); requestSignature(); }}
                 className="w-full h-10 bg-dark rounded-full items-center justify-center"
                 style={{
                   shadowColor: "#121212",

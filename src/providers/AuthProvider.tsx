@@ -62,22 +62,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const authenticated = !!authMethod && !!address;
 
-  // Debug: log auth state changes
-  console.log("[Auth]", {
-    isReady,
-    hasUser: !!user,
-    isTwitterUser,
-    authMethod,
-    embeddedWalletStatus: embeddedWallet?.status,
-    address,
-    authenticated,
-    linkedAccounts: user?.linked_accounts?.map((a: any) => ({
-      type: a.type,
-      wallet_client_type: a.wallet_client_type,
-      address: a.address,
-    })),
-  });
-
   const loginWithTwitter = useCallback(async () => {
     if (oauthState.status === "loading") return;
     try {
@@ -106,11 +90,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           throw new Error("Embedded wallet not ready");
         }
         const provider = await embeddedWallet.getProvider();
-        // Provider expects message as UTF-8 string
-        const messageStr = new TextDecoder().decode(message);
+        // Privy Expo SDK expects message as base64-encoded bytes
+        const messageBase64 = btoa(String.fromCharCode(...message));
         const result = await provider.request({
           method: "signMessage",
-          params: { message: messageStr },
+          params: { message: messageBase64 },
         });
         // Privy Expo SDK returns base64-encoded signature
         const binaryStr = atob(result.signature);

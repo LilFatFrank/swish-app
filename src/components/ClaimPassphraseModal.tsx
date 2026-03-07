@@ -14,6 +14,8 @@ import { useFee } from "@/hooks/useFee";
 import { formatNumber } from "@/utils";
 import { API_BASE_URL } from "@/constants/api";
 
+import { hapticLight, hapticSuccess, hapticError } from "@/utils/haptics";
+import { formatError } from "@/utils/formatError";
 import ReceiveIcon from "@/assets/receive-alt.svg";
 import SuccessAltIcon from "@/assets/success-alt.svg";
 
@@ -85,11 +87,13 @@ export function ClaimPassphraseModal({
       }
 
       setState("success");
+      hapticSuccess();
       onSuccess();
     } catch (error: any) {
       console.error("Claim failed:", error);
-      setErrorMessage(error.message || "Failed to claim");
+      setErrorMessage(formatError(error));
       setState("error");
+      hapticError();
     }
   };
 
@@ -216,7 +220,7 @@ export function ClaimPassphraseModal({
 
                 {/* Proceed Button */}
                 <Pressable
-                  onPress={handleProceed}
+                  onPress={() => { hapticLight(); handleProceed(); }}
                   disabled={!passphrase.trim()}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
@@ -300,7 +304,7 @@ export function ClaimPassphraseModal({
 
                 {/* Success Button */}
                 <Pressable
-                  onPress={handleClose}
+                  onPress={() => { hapticLight(); handleClose(); }}
                   className="w-full h-10 bg-light rounded-full items-center justify-center"
                   style={{
                     borderWidth: 1,
@@ -338,7 +342,7 @@ export function ClaimPassphraseModal({
                   {errorMessage || "Something went wrong"}
                 </Text>
                 <Pressable
-                  onPress={handleRetry}
+                  onPress={() => { hapticLight(); handleRetry(); }}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
                     shadowColor: "#121212",

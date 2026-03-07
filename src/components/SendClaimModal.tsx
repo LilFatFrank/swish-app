@@ -15,6 +15,8 @@ import { useSendClaimTransaction } from "@/hooks/useSendClaimTransaction";
 import { useFee } from "@/hooks/useFee";
 import { formatNumber } from "@/utils";
 
+import { hapticSuccess, hapticError, hapticLight } from "@/utils/haptics";
+import { formatError } from "@/utils/formatError";
 import SendIcon from "@/assets/send-alt.svg";
 import CopyIcon from "@/assets/copy-icon.svg";
 import SuccessIcon from "@/assets/success.svg";
@@ -89,16 +91,19 @@ export function SendClaimModal({
       setClaimLink(result.claimLink);
       setPassphrase(result.passphrase);
       setState("success");
+      hapticSuccess();
     } catch (error: any) {
       console.error("Send claim failed:", error);
-      setErrorMessage(error.message || "Something went wrong");
+      setErrorMessage(formatError(error));
       setState("error");
+      hapticError();
     }
   };
 
   const handleCopyLink = async () => {
     await Clipboard.setStringAsync(`${claimLink}\n\nPassphrase: ${passphrase}`);
     setCopied(true);
+    hapticLight();
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -241,7 +246,7 @@ export function SendClaimModal({
 
                 {/* Proceed Button */}
                 <Pressable
-                  onPress={handleProceed}
+                  onPress={() => { hapticLight(); handleProceed(); }}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
                     shadowColor: "#121212",
@@ -370,7 +375,7 @@ export function SendClaimModal({
                   {errorMessage || "Something went wrong"}
                 </Text>
                 <Pressable
-                  onPress={handleRetry}
+                  onPress={() => { hapticLight(); handleRetry(); }}
                   className="w-full h-10 bg-dark rounded-full items-center justify-center"
                   style={{
                     shadowColor: "#121212",

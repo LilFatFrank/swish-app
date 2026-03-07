@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Modal } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { hapticLight } from "@/utils/haptics";
 
 interface ExportModalProps {
   visible: boolean;
@@ -8,6 +9,7 @@ interface ExportModalProps {
 
 export function ExportModal({ visible, onClose }: ExportModalProps) {
   const handleExport = async () => {
+    hapticLight();
     onClose();
     await WebBrowser.openBrowserAsync("https://swish.cash/p");
   };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { hapticLight } from "@/utils/haptics";
 
 interface QRScannerProps {
   visible: boolean;
@@ -37,10 +38,10 @@ export function QRScanner({ visible, onScan, onClose }: QRScannerProps) {
           <Text style={[styles.text, { marginBottom: 8 }]}>
             Camera access is needed to scan QR codes
           </Text>
-          <Pressable onPress={requestPermission} style={styles.grantButton}>
+          <Pressable onPress={() => { hapticLight(); requestPermission(); }} style={styles.grantButton}>
             <Text style={styles.grantButtonText}>Grant Permission</Text>
           </Pressable>
-          <Pressable onPress={onClose} style={styles.cancelButton}>
+          <Pressable onPress={() => { hapticLight(); onClose(); }} style={styles.cancelButton}>
             <Text style={styles.cancelText}>Cancel</Text>
           </Pressable>
         </View>
@@ -70,7 +71,7 @@ export function QRScanner({ visible, onScan, onClose }: QRScannerProps) {
 
       {/* Overlay with cutout effect */}
       <View style={styles.overlay}>
-        <Pressable onPress={onClose} style={styles.closeButton}>
+        <Pressable onPress={() => { hapticLight(); onClose(); }} style={styles.closeButton}>
           <Text style={styles.closeText}>Close</Text>
         </Pressable>
         <Text style={styles.hint}>Point at a Solana wallet QR code</Text>
