@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, Modal } from "react-native";
+import { View, Text, Pressable, ScrollView, Modal, Linking } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { Spinner, WithdrawModal, DepositModal, ExportModal } from "@/components";
@@ -336,7 +336,13 @@ export default function ProfileScreen() {
           </View>
         </View>
         {isXUser && twitterHandle && (
-          <View className="flex-row items-center gap-1.5 mt-1">
+          <Pressable
+            onPress={() => {
+              hapticLight();
+              Linking.openURL(`https://x.com/${twitterHandle}`);
+            }}
+            className="flex-row items-center gap-1.5 mt-1"
+          >
             <XIcon width={14} height={14} fill="#121212" />
             <Text
               className="text-dark/60 text-sm underline"
@@ -347,7 +353,7 @@ export default function ProfileScreen() {
             >
               @{twitterHandle}
             </Text>
-          </View>
+          </Pressable>
         )}
       </View>
 
